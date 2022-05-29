@@ -12,6 +12,7 @@ MODEL:
     - 224
   EXTRA:
     STAGE1:
+
       NUM_MODULES: 1
       NUM_RANCHES: 1
       BLOCK: BOTTLENECK
