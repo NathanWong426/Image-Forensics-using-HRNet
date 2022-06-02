@@ -26,11 +26,11 @@ import torchvision.transforms as transforms
 
 import _init_paths
 import models
-from config import config
-from config import update_config
-from core.function import validate
-from utils.modelsummary import get_model_summary
-from utils.utils import create_logger
+from lib.config import config
+from lib.config import update_config
+from lib.core.function import validate
+from lib.utils.modelsummary import get_model_summary
+from lib.utils.utils import create_logger
 
 
 def parse_args():

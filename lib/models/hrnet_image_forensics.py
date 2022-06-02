@@ -373,9 +373,9 @@ class HighResolutionNet(nn.Module):
                     transition_layers.append(nn.Sequential(
                         nn.Conv2d(num_channels_pre_layer[i],
                                   num_channels_cur_layer[i],
-                                  3,
-                                  1,
-                                  1,
+                                  kernel_size=3,
+                                  stride=1,
+                                  padding=1,
                                   bias=False),
                         nn.BatchNorm2d(
                             num_channels_cur_layer[i], momentum=BN_MOMENTUM),
@@ -445,6 +445,8 @@ class HighResolutionNet(nn.Module):
         return nn.Sequential(*modules), num_inchannels
 
     def forward(self, x):
+        # pre-process to downsample the image size 4-fold.
+        # outputs 64 features before layer1.
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -477,6 +479,7 @@ class HighResolutionNet(nn.Module):
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
 
+        '''
         # Classification Head
         y = self.incre_modules[0](y_list[0])
         for i in range(len(self.downsamp_modules)):
@@ -492,7 +495,21 @@ class HighResolutionNet(nn.Module):
                                  [2:]).view(y.size(0), -1)
 
         y = self.classifier(y)
+        '''
+        y = self.incre_modules[0](y_list[0])
+        for i in range(len(self.downsamp_modules)):
+            y = self.incre_modules[i + 1](y_list[i + 1]) + \
+                self.downsamp_modules[i](y)
 
+        y = self.final_layer(y)
+
+        if torch._C._get_tracing_state():
+            y = y.flatten(start_dim=2).mean(dim=2)
+        else:
+            y = F.avg_pool2d(y, kernel_size=y.size()
+            [2:]).view(y.size(0), -1)
+
+        y = self.classifier(y)
         return y
 
     def init_weights(self, pretrained='',):

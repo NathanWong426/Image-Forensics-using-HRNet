@@ -23,18 +23,18 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 import _init_paths
 import models
-from config import config
-from config import update_config
-from core.function import train
-from core.function import validate
-from utils.modelsummary import get_model_summary
-from utils.utils import get_optimizer
-from utils.utils import save_checkpoint
-from utils.utils import create_logger
+from lib.config import config
+from lib.config import update_config
+from lib.core.function import train
+from lib.core.function import validate
+from lib.utils.modelsummary import get_model_summary
+from lib.utils.utils import get_optimizer
+from lib.utils.utils import save_checkpoint
+from lib.utils.utils import create_logger
 
 
 def parse_args():
