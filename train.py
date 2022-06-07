@@ -25,8 +25,8 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.tensorboard import SummaryWriter
 
-import _init_paths
-import models
+import tools._init_paths
+import lib.models
 from lib.config import config
 from lib.config import update_config
 from lib.core.function import train

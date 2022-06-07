@@ -17,6 +17,8 @@ from pathlib import Path
 import torch
 import torch.optim as optim
 
+import numpy as np
+
 def create_logger(cfg, cfg_name, phase='train'):
     root_output_dir = Path(cfg.OUTPUT_DIR)
     # set up logger
@@ -90,3 +92,17 @@ def save_checkpoint(states, is_best, output_dir,
         torch.save(states['state_dict'],
                    os.path.join(output_dir, 'model_best.pth.tar'))
 
+
+def get_confusion_matrix(score, label, num_cls=2):
+    score = score.flatten()
+    label = label.flatten()
+
+    count = np.asarray(score * num_cls + label)
+    label_count = np.bincount(count)
+
+    confusion_matrix = np.zeros((num_cls, num_cls), dtype=np.int)
+    for i in range(num_cls):
+        for j in range(num_cls):
+            confusion_matrix[i, j] = label_count[i * num_cls + j]
+
+    return confusion_matrix

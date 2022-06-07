@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+from collections import OrderedDict
 
 def conv3x3(in_planes, out_planes, stride=1):
     # "3x3 convolution with padding"
@@ -36,9 +36,7 @@ class BasicBlock(nn.Module):
             residual = x
 
         out = self.group1(x) + residual
-
         out = self.relu(out)
-
         return out
 
 

@@ -32,6 +32,8 @@ from lib.core.function import validate
 from lib.utils.modelsummary import get_model_summary
 from lib.utils.utils import create_logger
 
+from tqdm import tqdm
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')
@@ -61,11 +63,12 @@ def parse_args():
 
     return args
 
+
 def main():
     args = parse_args()
 
     logger, final_output_dir, tb_log_dir = create_logger(
-        config, args.cfg, 'valid')
+        config, args.cfg, 'test')
 
     logger.info(pprint.pformat(args))
     logger.info(pprint.pformat(config))
@@ -75,7 +78,7 @@ def main():
     torch.backends.cudnn.deterministic = config.CUDNN.DETERMINISTIC
     torch.backends.cudnn.enabled = config.CUDNN.ENABLED
 
-    model = eval('models.'+config.MODEL.NAME+'.get_cls_net')(
+    model = eval('models.' + config.MODEL.NAME + '.get_cls_net')(
         config)
 
     dump_input = torch.rand(
@@ -104,14 +107,14 @@ def main():
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    valid_loader = torch.utils.data.DataLoader(
+    test_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose([
             transforms.Resize(int(config.MODEL.IMAGE_SIZE[0] / 0.875)),
             transforms.CenterCrop(config.MODEL.IMAGE_SIZE[0]),
             transforms.ToTensor(),
             normalize,
         ])),
-        batch_size=config.TEST.BATCH_SIZE_PER_GPU*len(gpus),
+        batch_size=config.TEST.BATCH_SIZE_PER_GPU * len(gpus),
         shuffle=False,
         num_workers=config.WORKERS,
         pin_memory=True
@@ -120,6 +123,13 @@ def main():
     # evaluate on validation set
     validate(config, valid_loader, model, criterion, final_output_dir,
              tb_log_dir, None)
+
+    with torch.no_grad():
+        try:
+            for (image,label) in tqdm(enum(test_loader)):
+                _, infer = model(image, label)
+        except:
+            print('Error loading image file!')
 
 
 if __name__ == '__main__':
